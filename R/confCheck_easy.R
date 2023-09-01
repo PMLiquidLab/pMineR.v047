@@ -2282,13 +2282,10 @@ confCheck_easy<-function( verbose.mode = TRUE ) {
     ID.skippati <-c()
     for( ID in PatID ) {
       toProcess <- TRUE
-      # -im (2)
       if( length(res$list.computation.matrix$stati.timeline[[ID]]) <= 4 )  {
         toProcess <- FALSE; ID.skippati <- c( ID.skippati , ID ) 
       }
-      # -fm (2)
-      # -im 
-      # if(param.verbose == TRUE)  cat("\n ID=",ID)
+
       if( !(ID %in% names(res$list.computation.matrix$stati.timeline))) {
         toProcess <- FALSE; ID.skippati <- c( ID.skippati , ID ) 
       }
@@ -2298,13 +2295,7 @@ confCheck_easy<-function( verbose.mode = TRUE ) {
         fromMin <- tmpHac[ which(tmpHac[,1]==fromState & tmpHac[,2]=="begin" )[1], 4 ]
         toMin <- tmpHac[ which(tmpHac[,1]==toState & tmpHac[,2]=="begin" )[1], 4 ]
         PDVMin <- tmpHac[ which(tmpHac[,1] %in% PDVAt & tmpHac[,2]=="begin" )[1], 4 ] 
-        # PDVMin_vect <- tmpHac[ which(tmpHac[,1] %in% PDVAt & tmpHac[,2]=="begin" )[1], 4 ] 
-        # if (sum(is.na(PDVMin_vect))==length(PDVMin_vect)) {
-        #   PDVMin <- NA
-        # } else {
-        #   PDVMin <- min(tmpHac[ which(tmpHac[,1] %in% PDVAt & tmpHac[,2]=="begin" )[1], 4 ], na.rm = T)
-        # }
-        # evento <- NA
+
         
         if (is.na(fromMin)) {
           evento <- -1
@@ -2335,67 +2326,13 @@ confCheck_easy<-function( verbose.mode = TRUE ) {
         tabellona <- rbind(tabellona,c(ID,deltaMin,evento))
         
       }
-      # tmpHac <- res$list.computation.matrix$stati.timeline[[ID]]
-      # fromMin <- tmpHac[ which(tmpHac[,1]==fromState & tmpHac[,2]=="begin" )[1], 4 ]
-      # toMin <- tmpHac[ which(tmpHac[,1]==toState & tmpHac[,2]=="begin" )[1], 4 ]
-      # PDVMin <- tmpHac[ which(tmpHac[,1] %in% PDVAt & tmpHac[,2]=="begin" )[1], 4 ] 
-      # # PDVMin_vect <- tmpHac[ which(tmpHac[,1] %in% PDVAt & tmpHac[,2]=="begin" )[1], 4 ] 
-      # # if (sum(is.na(PDVMin_vect))==length(PDVMin_vect)) {
-      # #   PDVMin <- NA
-      # # } else {
-      # #   PDVMin <- min(tmpHac[ which(tmpHac[,1] %in% PDVAt & tmpHac[,2]=="begin" )[1], 4 ], na.rm = T)
-      # # }
-      # # evento <- NA
-      # 
-      # if (is.na(fromMin)) {
-      #   evento <- -1
-      # } else { # !is.na(fromMin)
-      #   if (is.na(toMin)) {
-      #     if (is.na(PDVMin)) {
-      #       evento <- -1
-      #     } else {
-      #       evento <- 0
-      #     }
-      #   } else { # !is.na(toMin)
-      #     if (is.na(PDVMin)) {
-      #       evento <- 1
-      #     } else {
-      #       if (PDVMin < toMin) {
-      #         evento <- 0
-      #       } else {
-      #         evento <- 1
-      #       }
-      #     }
-      #   }
-      # }
-      # 
-      # if (evento == -1) deltaMin <- NA
-      # if (evento == 0) deltaMin <- as.numeric(PDVMin) - as.numeric(fromMin)
-      # if (evento == 1) deltaMin <- as.numeric(toMin) - as.numeric(fromMin)
-      # 
-      # tabellona <- rbind(tabellona,c(ID,deltaMin,evento))
-      # tmpHac <- res$list.computation.matrix$stati.timeline[[ID]]
-      # fromMin <- tmpHac[ which(tmpHac[,1]==fromState & tmpHac[,2]=="begin" )[1], 4 ]
-      # toMin <- tmpHac[ which(tmpHac[,1]==toState & tmpHac[,2]=="begin" )[1], 4 ]
-      # evento <- 1
-      # if(is.na(toMin)) { 
-      #   toMin <- max(as.numeric(res$list.computation.matrix$stati.timeline[[ID]][,4] ))
-      #   evento <- 0
-      # }
-      # deltaMin <- as.numeric(toMin) - as.numeric(fromMin)
-      # tabellona <- rbind(tabellona,c(ID,deltaMin,evento))
-      # - fm
     }
     
     for( ID in ID.skippati ) { cat( "\n WARNING: the patient ",ID," has been skipped " )}
     
-    # -im ET
     tabellona <- matrix(tabellona[which(tabellona[,3]!=-1),], ncol=3)
     tabellona <- matrix(tabellona[  sort(as.numeric(tabellona[,2]),index.return = T)$ix, ], ncol=3)
-    # tabellona <- tabellona[  sort(as.numeric(tabellona[,2]),index.return = T)$ix, ]
-    # if(!is.matrix(tabellona)) return( list("table"=NA, "KM"=NA ) )
-    # -fm ET
-    
+
     colnames(tabellona) <- c("ID","time","outcome")
     
     aaa <- data.frame("ID"=tabellona[,1],"time"=as.numeric(tabellona[,2]),"outcome"=as.numeric(tabellona[,3]) )
@@ -2415,22 +2352,17 @@ confCheck_easy<-function( verbose.mode = TRUE ) {
     
     TOF.list <- Time.To.Flight( fromState, toState, passingThrough, passingNotThrough, stoppingAt, 
              stoppingNotAt, PDVAt, withPatientID, UM = UM )
-    # browser()
+
     if (TOF.list$error != 0) {
       return(list("table"=NA, "KM"=NA, "ID"=NA, "error"=TOF.list$error ))
     }
     
     aaa <- TOF.list$TOF.table
-    # browser()
-    
     KM0 <- survfit(Surv(time, outcome)~1,   data=aaa)
     
-    # return( list("table"=aaa, "KM"=KM0, "ID"=tabellona[,1] ) )
     return( list("table"=aaa, "KM"=KM0, "ID"=aaa$ID, "error"=0 ) )
-    
   }
   LogRankTest<-function( KM1 , KM2, col.1, col.2 )  {
-    # browser()
     path.1 <- KM1
     path.2 <- KM2
     new.df <- rbind(path.1$table,path.2$table)
@@ -2496,7 +2428,6 @@ confCheck_easy<-function( verbose.mode = TRUE ) {
     "replay"=replay, # rimpiazza la playLoadedData
     "plot"=plot, # rimpiazza la plotGraph
     "plot.replay.result"=plot.replay.result, # rimpiazza la plotComputationResult
-    # "query.Patient"=query.Patient,
     "get.list.replay.result"=get.list.replay.result, # rimpiazza la getPlayedSequencesStat.00
     "get.XML.replay.result"=get.XML.replay.result, # rimpiazza la getXML
     "plotPatientReplayedTimeline" = plotPatientReplayedTimeline, # rimpiazza la plotPatientComputedTimeline
